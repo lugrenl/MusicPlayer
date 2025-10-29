@@ -4,29 +4,54 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.CompoundButton
+import android.widget.RadioButton
+import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-class RVAdapter : RecyclerView.Adapter<MyViewHolder>() {
+class RVAdapter : RecyclerView.Adapter<RVAdapter.MyViewHolder>() {
 
-    var createCounter = 0
+    private var checkedPosition: Int = 0
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
-        Log.e("RVAdapter", "Create ${createCounter++}")
-        val view: View = LayoutInflater
-            .from(parent.context)
-            .inflate(R.layout.view_a, parent, false)
-        return MyViewHolder(view)
+        return MyViewHolder(
+            LayoutInflater.from(parent.context)
+                .inflate(R.layout.view_a, parent, false))
     }
 
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
-        Log.e("RVAdapter", "Bind $position")
+        holder.setChecked(position == checkedPosition)
+
     }
 
     override fun getItemCount(): Int {
-        return 100
+        return 10
+    }
+
+    private fun setCheckedPosition(position: Int) {
+        if (position == RecyclerView.NO_POSITION) return
+        checkedPosition = position
+        notifyItemChanged(position, Unit)
+        notifyItemChanged(checkedPosition, Unit)
+    }
+
+    inner class MyViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+
+        private val radioButton: RadioButton = view.findViewById(R.id.radio_button)
+
+        private val checkedListener: CompoundButton.OnCheckedChangeListener =
+            CompoundButton.OnCheckedChangeListener { _, _ -> setCheckedPosition(bindingAdapterPosition) }
+
+        init {
+            radioButton.setOnCheckedChangeListener(checkedListener)
+        }
+
+        fun setChecked(checked: Boolean) {
+            radioButton.setOnCheckedChangeListener(null)
+            radioButton.isChecked = checked
+            radioButton.setOnCheckedChangeListener(checkedListener)
+        }
+
     }
 }
 
-class MyViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-
-}
