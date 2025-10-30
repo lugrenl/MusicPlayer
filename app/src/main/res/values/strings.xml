@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">Music Player</string>
+    <string name="empty_playlist_image">empty_playlist_image</string>
+    <string name="empty_playlist_text">There are no music tracks here yet! Click the button below to upload some</string>
+    <string name="track">Track</string>
+    <string name="artist">Artist</string>
+    <string name="duration">3:21</string>
+    <string name="state">play_pause</string>
+    <string name="preview">album_preview</string>
 </resources>
