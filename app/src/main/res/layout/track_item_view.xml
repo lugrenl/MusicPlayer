@@ -63,7 +63,6 @@
         app:layout_constraintTop_toBottomOf="@+id/track"
         app:layout_constraintStart_toEndOf="@+id/preview"
         app:layout_constraintBottom_toBottomOf="@id/preview"
-        app:layout_constraintEnd_toStartOf=""
         android:layout_marginStart="7dp"
         android:text="@string/artist"
         android:textColor="#777777"
