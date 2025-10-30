@@ -1,57 +1,56 @@
 package com.example.musicplayer
 
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.CompoundButton
-import android.widget.RadioButton
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-class RVAdapter : RecyclerView.Adapter<RVAdapter.MyViewHolder>() {
+class RVAdapter : RecyclerView.Adapter<TrackViewHolder>() {
 
-    private var checkedPosition: Int = 0
+    private val items = IntArray(30) { it }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
-        return MyViewHolder(
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TrackViewHolder {
+        return TrackViewHolder(
             LayoutInflater.from(parent.context)
-                .inflate(R.layout.view_a, parent, false))
+                .inflate(R.layout.track_item_view, parent, false)
+
+        )
     }
 
-    override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
-        holder.setChecked(position == checkedPosition)
-
+    override fun onBindViewHolder(holder: TrackViewHolder, position: Int) {
+        holder.bind(items[position])
     }
 
     override fun getItemCount(): Int {
-        return 10
+        return items.size
     }
 
-    private fun setCheckedPosition(position: Int) {
-        if (position == RecyclerView.NO_POSITION) return
-        checkedPosition = position
-        notifyItemChanged(position, Unit)
-        notifyItemChanged(checkedPosition, Unit)
-    }
+}
 
-    inner class MyViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+class TrackViewHolder(view: View) : RecyclerView.ViewHolder(view) {
 
-        private val radioButton: RadioButton = view.findViewById(R.id.radio_button)
+    private val track = view.findViewById<TextView>(R.id.track)
+    private val artist = view.findViewById<TextView>(R.id.artist)
+    private val duration = view.findViewById<TextView>(R.id.duration)
+    private val preview = view.findViewById<ImageView>(R.id.preview)
+    private val state = view.findViewById<ImageView>(R.id.state).apply { visibility = View.VISIBLE }
 
-        private val checkedListener: CompoundButton.OnCheckedChangeListener =
-            CompoundButton.OnCheckedChangeListener { _, _ -> setCheckedPosition(bindingAdapterPosition) }
-
-        init {
-            radioButton.setOnCheckedChangeListener(checkedListener)
+    fun bind(value: Int) {
+        if (value % 2 == 0) {
+            state.setImageResource(R.drawable.play)
+        } else {
+            state.setImageResource(R.drawable.pause)
         }
-
-        fun setChecked(checked: Boolean) {
-            radioButton.setOnCheckedChangeListener(null)
-            radioButton.isChecked = checked
-            radioButton.setOnCheckedChangeListener(checkedListener)
-        }
+        val text = value.toString()
+        track.text = text
+        artist.text = text
+        duration.text = text
 
     }
+
+
+
 }
 

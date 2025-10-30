@@ -8,7 +8,7 @@
     android:layout_marginEnd="16dp"
     android:layout_marginTop="4dp"
     android:layout_marginBottom="4dp"
-    android:background="@drawable/rounded_background"
+    android:background="@android:color/darker_gray"
     android:backgroundTint="@color/white">
 
     <ImageView
@@ -20,7 +20,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         android:layout_margin="7dp"
-        android:background="@drawable/rounded_background"
+        android:background="@color/white"
         android:backgroundTint="@android:color/holo_orange_dark"
         android:scaleType="fitXY"
         tools:backgroundTint="@android:color/holo_orange_dark"
@@ -78,6 +78,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginEnd="7dp"
         />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
