@@ -46,4 +46,18 @@
         tools:itemCount="15"
         />
 
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/add_tracks_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_margin="16dp"
+        android:backgroundTint="#2037EB"
+        android:src="@drawable/add_tracks"
+        app:tint="@android:color/white"
+        app:maxImageSize="14dp"
+        android:contentDescription="@string/plus_button"
+        />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

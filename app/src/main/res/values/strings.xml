@@ -7,4 +7,6 @@
     <string name="duration">3:21</string>
     <string name="state">play_pause</string>
     <string name="preview">album_preview</string>
+    <string name="title_audio_file_picker">Select audio file(s)</string>
+    <string name="plus_button">plus_button</string>
 </resources>
