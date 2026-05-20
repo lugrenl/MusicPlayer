@@ -4,7 +4,6 @@ import android.app.Activity.RESULT_OK
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -15,12 +14,15 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist) {
         private const val REQUEST_AUDIO = 12345
     }
 
+    private val model by lazy { PlaylistModelImpl(requireContext()) }
+
+    private val playlistView by lazy { requireView().findViewById<RecyclerView>(R.id.playlist_view) }
+
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val playlistView = view.findViewById<RecyclerView>(R.id.playlist_view)
-        playlistView.adapter = RVAdapter()
+        playlistView.adapter = RVAdapter(model)
 
         view.findViewById<FloatingActionButton>(R.id.add_tracks_button).setOnClickListener {
             onAddTracksButtonClicked()
@@ -50,7 +52,8 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist) {
                         data.clipData?.getItemAt(index)?.uri  // множество элементов
                     }
                 )}
-                Toast.makeText(requireContext(), "SELECT FILE(S): ${items.size}", Toast.LENGTH_SHORT).show()
+                playlistView.visibility = View.VISIBLE
+                model.addFiles(items)
             }
         }
         super.onActivityResult(requestCode, resultCode, data)

@@ -42,6 +42,7 @@
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         android:orientation="vertical"
         android:background="#EFEFEF"
+        android:visibility="gone"
         tools:listitem="@layout/track_item_view"
         tools:itemCount="15"
         />

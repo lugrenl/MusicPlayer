@@ -9,4 +9,6 @@
     <string name="preview">album_preview</string>
     <string name="title_audio_file_picker">Select audio file(s)</string>
     <string name="plus_button">plus_button</string>
+    <string name="unknown_artist">Unknown Artist</string>
+    <string name="unknown_track">Unknown Track</string>
 </resources>
