@@ -10,24 +10,32 @@ import androidx.annotation.StringRes
 import androidx.recyclerview.widget.RecyclerView
 import java.util.concurrent.TimeUnit
 
-class RVAdapter(private val model: PlayListModel) : RecyclerView.Adapter<TrackViewHolder>() {
+class RVAdapter(
+    private val model: PlayListModel,
+    private val actions: Actions) : RecyclerView.Adapter<TrackViewHolder>() {
+
+    interface Actions {
+        fun onPreviewClicked(index: Int)
+    }
 
     private val listener = object : PlayListModel.Listener {
         override fun onItemAdded(index: Int) = notifyItemInserted(index)
+        override fun onItemChanged(index: Int) = notifyItemChanged(index, Unit)
     }
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
-        model.listener = listener
+        model.addListener(listener)
     }
 
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
-        model.listener = null
+        model.removeListener(listener)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TrackViewHolder {
         return TrackViewHolder(
-            LayoutInflater.from(parent.context)
-                .inflate(R.layout.track_item_view, parent, false)
+            view = LayoutInflater.from(parent.context)
+                .inflate(R.layout.track_item_view, parent, false),
+            actions = actions
         )
     }
 
@@ -41,9 +49,20 @@ class RVAdapter(private val model: PlayListModel) : RecyclerView.Adapter<TrackVi
 
 }
 
-class TrackViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+class TrackViewHolder(
+    view: View,
+    private val actions: RVAdapter.Actions
+) : RecyclerView.ViewHolder(view) {
 
-    private val preview = view.findViewById<ImageView>(R.id.preview).apply { clipToOutline = true }
+    private val preview = view.findViewById<ImageView>(R.id.preview).apply {
+        clipToOutline = true
+        setOnClickListener {
+            val index = adapterPosition
+            if (index != RecyclerView.NO_POSITION) {
+                actions.onPreviewClicked(index)
+            }
+        }
+    }
     private val state = view.findViewById<ImageView>(R.id.state)
     private val track = view.findViewById<TextView>(R.id.track)
     private val artist = view.findViewById<TextView>(R.id.artist)
@@ -55,6 +74,13 @@ class TrackViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         track.text = value.track ?: getString(R.string.unknown_track)
         duration.text = value.duration.msBeautify()
         preview.setImageBitmap(value.preview)
+        state.setImageResource(
+            when (value.state) {
+                PlayListModel.Item.State.NONE -> android.R.color.transparent
+                PlayListModel.Item.State.ACTIVE -> R.drawable.play
+                PlayListModel.Item.State.PLAYING -> R.drawable.pause
+            }
+        )
     }
 
     private fun getString(@StringRes resId: Int) = itemView.context.getString(resId)
