@@ -2,9 +2,11 @@ package com.example.musicplayer
 
 import android.app.Activity.RESULT_OK
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
+import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
@@ -74,18 +76,22 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist) {
         view.findViewById<FloatingActionButton>(R.id.add_tracks_button).setOnClickListener {
             onAddTracksButtonClicked()
         }
+
+        if (savedInstanceState == null) {
+            model.restore(PreferenceManager.getDefaultSharedPreferences(requireContext()))
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == REQUEST_AUDIO) {
             if (resultCode == RESULT_OK) {
-                val items = Array(checkNotNull(data).clipData?.itemCount ?: 1) { index -> checkNotNull(
+                val items = Array(checkNotNull(data).clipData?.itemCount ?: 1) { index -> processUri(checkNotNull(
                     if (index == 0 && data.data != null) {
                         data.data  // один элемент
                     } else {
-                        data.clipData?.getItemAt(index)?.uri  // множество элементов
+                        data.clipData?.getItemAt(index)?.uri // множество элементов
                     }
-                )}
+                ))}
                 playlistView.visibility = View.VISIBLE
                 model.addFiles(items)
             }
@@ -93,16 +99,30 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist) {
         super.onActivityResult(requestCode, resultCode, data)
     }
 
+    override fun onStop() {
+        super.onStop()
+        model.save(PreferenceManager.getDefaultSharedPreferences(requireContext()))
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         model.removeListener(modelListener)
     }
 
+    private fun processUri(uri: Uri): Uri {
+        with(requireContext()) {
+            grantUriPermission(packageName, uri, Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+        return uri
+    }
+
     private fun onAddTracksButtonClicked() {
         startActivityForResult(
             Intent.createChooser(
-                Intent(Intent.ACTION_GET_CONTENT).apply {
+                Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
                     type = "audio/*"
+                    flags = flags or Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION
                     putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
                 },
                 getString(R.string.title_audio_file_picker)

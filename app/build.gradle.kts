@@ -47,4 +47,5 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     implementation("com.google.android.exoplayer:exoplayer-core:2.19.1")
+    implementation("androidx.preference:preference-ktx:1.2.1")
 }

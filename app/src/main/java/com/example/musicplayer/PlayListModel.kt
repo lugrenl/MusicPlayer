@@ -1,5 +1,6 @@
 package com.example.musicplayer
 
+import android.content.SharedPreferences
 import android.graphics.Bitmap
 import android.net.Uri
 
@@ -39,4 +40,8 @@ interface PlayListModel {
     fun setActive(uri: Uri?)
 
     fun setPlayingState(isPlaying: Boolean)
+
+    fun save(storage: SharedPreferences)
+
+    fun restore(storage: SharedPreferences)
 }

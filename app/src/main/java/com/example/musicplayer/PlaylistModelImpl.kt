@@ -1,11 +1,13 @@
 package com.example.musicplayer
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.media.MediaMetadataRetriever
 import android.media.MediaMetadataRetriever.*
 import android.net.Uri
+import androidx.core.content.edit
 import java.util.LinkedList
 
 class PlaylistModelImpl(private val context: Context): PlayListModel {
@@ -18,6 +20,11 @@ class PlaylistModelImpl(private val context: Context): PlayListModel {
         override val uri: Uri,
         override var state: PlayListModel.Item.State = PlayListModel.Item.State.NONE
     ) : PlayListModel.Item
+
+    companion object {
+        private const val KEY_PLAYLIST = "KEY_PLAYLIST"
+        private const val SEPARATOR = ", "
+    }
 
     private val retriever = MediaMetadataRetriever()
     private val items = LinkedList<ItemImpl>()
@@ -73,6 +80,18 @@ class PlaylistModelImpl(private val context: Context): PlayListModel {
         if (this.isPlaying == isPlaying) return
         this.isPlaying = isPlaying
         applyPlayingState()
+    }
+
+    override fun save(storage: SharedPreferences) {
+        storage.edit {
+            putString(KEY_PLAYLIST, items.map { it.uri }.joinToString(SEPARATOR))
+        }
+    }
+
+    override fun restore(storage: SharedPreferences) {
+        val items = storage.getString(KEY_PLAYLIST, null)?.split(SEPARATOR)
+        if (items.isNullOrEmpty()) return
+        addFiles(items.map { Uri.parse(it) }.toTypedArray())
     }
 
     private fun addItem(item: ItemImpl) {
