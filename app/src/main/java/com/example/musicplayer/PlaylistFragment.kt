@@ -39,6 +39,7 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist) {
 
     private val modelListener = object : PlayListModel.Listener {
         override fun onItemAdded(index: Int) {
+            playlistView.visibility = View.VISIBLE
             player.addMediaItem(model.itemAt(index).toMediaItem())
             player.prepare()
         }
@@ -72,7 +73,6 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist) {
                 }
             }
         )
-
         view.findViewById<FloatingActionButton>(R.id.add_tracks_button).setOnClickListener {
             onAddTracksButtonClicked()
         }
@@ -92,7 +92,6 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist) {
                         data.clipData?.getItemAt(index)?.uri // множество элементов
                     }
                 ))}
-                playlistView.visibility = View.VISIBLE
                 model.addFiles(items)
             }
         }
