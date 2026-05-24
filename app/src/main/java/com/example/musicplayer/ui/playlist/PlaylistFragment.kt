@@ -1,4 +1,8 @@
-package com.example.musicplayer
+package com.example.musicplayer.ui.playlist
+
+import com.example.musicplayer.R
+import com.example.musicplayer.data.PlaylistManagerImpl
+import com.example.musicplayer.domain.PlaylistManager
 
 import android.app.Activity.RESULT_OK
 import android.content.Intent
@@ -19,7 +23,7 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist) {
         private const val REQUEST_AUDIO = 12345
     }
 
-    private val model by lazy { PlaylistModelImpl(requireContext()) }
+    private val model by lazy { PlaylistManagerImpl(requireContext()) }
 
     private val playlistView by lazy { requireView().findViewById<RecyclerView>(R.id.playlist_view) }
 
@@ -37,14 +41,14 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist) {
         })
     } }
 
-    private val modelListener = object : PlayListModel.Listener {
+    private val modelListener = object : PlaylistManager.Listener {
         override fun onItemAdded(index: Int) {
             playlistView.visibility = View.VISIBLE
             player.addMediaItem(model.itemAt(index).toMediaItem())
             player.prepare()
         }
 
-        private fun PlayListModel.Item.toMediaItem(): MediaItem = MediaItem.fromUri(uri)
+        private fun PlaylistManager.Item.toMediaItem(): MediaItem = MediaItem.fromUri(uri)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -55,18 +59,18 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        playlistView.adapter = RVAdapter(
+        playlistView.adapter = PlaylistAdapter(
             model = model,
-            actions = object : RVAdapter.Actions {
+            actions = object : PlaylistAdapter.Actions {
                 override fun onPreviewClicked(index: Int) {
                     val item = model.itemAt(index)
                     when (item.state) {
-                        PlayListModel.Item.State.NONE -> {
+                        PlaylistManager.Item.State.NONE -> {
                             player.seekToDefaultPosition(index)
                             player.play()
                         }
-                        PlayListModel.Item.State.ACTIVE -> player.play()
-                        PlayListModel.Item.State.PLAYING -> {
+                        PlaylistManager.Item.State.ACTIVE -> player.play()
+                        PlaylistManager.Item.State.PLAYING -> {
                             player.pause()
                         }
                     }

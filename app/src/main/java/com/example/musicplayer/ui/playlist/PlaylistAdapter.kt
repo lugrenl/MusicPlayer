@@ -1,4 +1,7 @@
-package com.example.musicplayer
+package com.example.musicplayer.ui.playlist
+
+import com.example.musicplayer.R
+import com.example.musicplayer.domain.PlaylistManager
 
 import android.annotation.SuppressLint
 import android.view.LayoutInflater
@@ -10,15 +13,15 @@ import androidx.annotation.StringRes
 import androidx.recyclerview.widget.RecyclerView
 import java.util.concurrent.TimeUnit
 
-class RVAdapter(
-    private val model: PlayListModel,
+class PlaylistAdapter(
+    private val model: PlaylistManager,
     private val actions: Actions) : RecyclerView.Adapter<TrackViewHolder>() {
 
     interface Actions {
         fun onPreviewClicked(index: Int)
     }
 
-    private val listener = object : PlayListModel.Listener {
+    private val listener = object : PlaylistManager.Listener {
         override fun onItemAdded(index: Int) = notifyItemInserted(index)
         override fun onItemChanged(index: Int) = notifyItemChanged(index, Unit)
     }
@@ -51,7 +54,7 @@ class RVAdapter(
 
 class TrackViewHolder(
     view: View,
-    private val actions: RVAdapter.Actions
+    private val actions: PlaylistAdapter.Actions
 ) : RecyclerView.ViewHolder(view) {
 
     private val preview = view.findViewById<ImageView>(R.id.preview).apply {
@@ -69,16 +72,16 @@ class TrackViewHolder(
     private val duration = view.findViewById<TextView>(R.id.duration)
 
 
-    fun bind(value: PlayListModel.Item) {
+    fun bind(value: PlaylistManager.Item) {
         artist.text = value.artist ?: getString(R.string.unknown_artist)
         track.text = value.track ?: getString(R.string.unknown_track)
         duration.text = value.duration.msBeautify()
         preview.setImageBitmap(value.preview)
         state.setImageResource(
             when (value.state) {
-                PlayListModel.Item.State.NONE -> android.R.color.transparent
-                PlayListModel.Item.State.ACTIVE -> R.drawable.play
-                PlayListModel.Item.State.PLAYING -> R.drawable.pause
+                PlaylistManager.Item.State.NONE -> android.R.color.transparent
+                PlaylistManager.Item.State.ACTIVE -> R.drawable.play
+                PlaylistManager.Item.State.PLAYING -> R.drawable.pause
             }
         )
     }

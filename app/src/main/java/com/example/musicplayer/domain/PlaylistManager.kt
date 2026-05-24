@@ -1,10 +1,10 @@
-package com.example.musicplayer
+package com.example.musicplayer.domain
 
 import android.content.SharedPreferences
 import android.graphics.Bitmap
 import android.net.Uri
 
-interface PlayListModel {
+interface PlaylistManager {
 
     interface Item {
 

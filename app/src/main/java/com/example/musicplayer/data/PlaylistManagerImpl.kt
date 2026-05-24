@@ -1,4 +1,6 @@
-package com.example.musicplayer
+package com.example.musicplayer.data
+
+import com.example.musicplayer.domain.PlaylistManager
 
 import android.content.Context
 import android.content.SharedPreferences
@@ -10,7 +12,7 @@ import android.net.Uri
 import androidx.core.content.edit
 import java.util.LinkedList
 
-class PlaylistModelImpl(private val context: Context): PlayListModel {
+class PlaylistManagerImpl(private val context: Context): PlaylistManager {
 
     private data class ItemImpl(
         override val artist: String?,
@@ -18,8 +20,8 @@ class PlaylistModelImpl(private val context: Context): PlayListModel {
         override val duration: Long,
         override val preview: Bitmap?,
         override val uri: Uri,
-        override var state: PlayListModel.Item.State = PlayListModel.Item.State.NONE
-    ) : PlayListModel.Item
+        override var state: PlaylistManager.Item.State = PlaylistManager.Item.State.NONE
+    ) : PlaylistManager.Item
 
     companion object {
         private const val KEY_PLAYLIST = "KEY_PLAYLIST"
@@ -32,14 +34,14 @@ class PlaylistModelImpl(private val context: Context): PlayListModel {
     private var activeItem: ItemImpl? = null
     private var isPlaying = false
 
-    private var listeners = mutableSetOf<PlayListModel.Listener>()
+    private var listeners = mutableSetOf<PlaylistManager.Listener>()
 
-    override fun addListener(listener: PlayListModel.Listener) {
+    override fun addListener(listener: PlaylistManager.Listener) {
         if (listeners.contains(listener)) return
         listeners.add(listener)
     }
 
-    override fun removeListener(listener: PlayListModel.Listener) {
+    override fun removeListener(listener: PlaylistManager.Listener) {
         listeners.remove(listener)
     }
 
@@ -49,7 +51,7 @@ class PlaylistModelImpl(private val context: Context): PlayListModel {
         files.forEach { uri ->
             try {
                 retriever.setDataSource(context, uri)
-                val item = ItemImpl(
+                ItemImpl(
                     artist = retriever.extractMetadata(METADATA_KEY_ARTIST),
                     track = retriever.extractMetadata(METADATA_KEY_TITLE),
                     duration = checkNotNull(retriever.extractMetadata(METADATA_KEY_DURATION)).toLong(),
@@ -58,18 +60,18 @@ class PlaylistModelImpl(private val context: Context): PlayListModel {
                     },
                     uri = uri
                 )
-            } catch (ignore: RuntimeException) {
+            } catch (_: RuntimeException) {
             }
         }
     }
 
-    override fun itemAt(index: Int): PlayListModel.Item = items[index]
+    override fun itemAt(index: Int): PlaylistManager.Item = items[index]
 
     override fun setActive(uri: Uri?) {
         val item = items.find { it.uri == uri }
         if (item == activeItem) return
         activeItem?.let {
-            it.state = PlayListModel.Item.State.NONE
+            it.state = PlaylistManager.Item.State.NONE
             notifyItemChanged(it)
         }
         activeItem = item
@@ -94,14 +96,9 @@ class PlaylistModelImpl(private val context: Context): PlayListModel {
         addFiles(items.map { Uri.parse(it) }.toTypedArray())
     }
 
-    private fun addItem(item: ItemImpl) {
-        items.add(item)
-        notify { onItemAdded(size - 1) }
-    }
-
     private fun applyPlayingState() {
         with(activeItem ?: return) {
-            state = if (isPlaying) PlayListModel.Item.State.PLAYING else PlayListModel.Item.State.ACTIVE
+            state = if (isPlaying) PlaylistManager.Item.State.PLAYING else PlaylistManager.Item.State.ACTIVE
             notifyItemChanged(this)
         }
     }
@@ -113,7 +110,7 @@ class PlaylistModelImpl(private val context: Context): PlayListModel {
         }
     }
 
-    private fun notify(event: PlayListModel.Listener.() -> Unit) {
+    private fun notify(event: PlaylistManager.Listener.() -> Unit) {
         listeners.forEach(event)
     }
 }

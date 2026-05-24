@@ -1,4 +1,6 @@
-package com.example.musicplayer
+package com.example.musicplayer.ui.main
+
+import com.example.musicplayer.R
 
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
