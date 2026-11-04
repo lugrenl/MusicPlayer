@@ -33,7 +33,7 @@ interface PlaylistManager {
 
     val size: Int
 
-    fun addFiles(files: Array<Uri>)
+    suspend fun addFiles(files: Array<Uri>)
 
     fun itemAt(index: Int): Item
 
@@ -43,5 +43,7 @@ interface PlaylistManager {
 
     fun save(storage: SharedPreferences)
 
-    fun restore(storage: SharedPreferences)
+    suspend fun restore(storage: SharedPreferences)
+
+    fun release()
 }

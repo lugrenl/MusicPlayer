@@ -11,4 +11,9 @@
     <string name="plus_button">plus_button</string>
     <string name="unknown_artist">Unknown Artist</string>
     <string name="unknown_track">Unknown Track</string>
+    <string name="now_playing">Now Playing</string>
+    <string name="back">Back</string>
+    <string name="play">Play</string>
+    <string name="pause">Pause</string>
+    <string name="album_cover">Album cover</string>
 </resources>

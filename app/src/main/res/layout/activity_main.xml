@@ -4,13 +4,13 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context="com.example.musicplayer.ui.main.MainActivity">
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/fragment_playlist"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:name="com.example.musicplayer.PlaylistFragment"
+        android:name="com.example.musicplayer.ui.playlist.PlaylistFragment"
         tools:layout="@layout/fragment_playlist"
         />
 
