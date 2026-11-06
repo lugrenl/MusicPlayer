@@ -211,6 +211,100 @@ class PlaylistManagerImplTest {
         }
     }
 
+    @Test
+    fun removeAtKeepsRemainingOrderPersistsAndNotifiesRemovedIndex() {
+        runBlocking {
+            val firstFile = createWavFile("remove_first.wav")
+            val secondFile = createWavFile("remove_second.wav")
+            val thirdFile = createWavFile("remove_third.wav")
+            val first = Uri.fromFile(firstFile)
+            val second = Uri.fromFile(secondFile)
+            val third = Uri.fromFile(thirdFile)
+            manager.save(storage)
+            manager.addFiles(arrayOf(first, second, third))
+
+            val removed = mutableListOf<Int>()
+            manager.addListener(object : PlaylistManager.Listener {
+                override fun onItemRemoved(index: Int) {
+                    removed.add(index)
+                }
+            })
+
+            manager.removeAt(1)
+
+            assertEquals(2, manager.size)
+            assertEquals(first, manager.itemAt(0).uri)
+            assertEquals(third, manager.itemAt(1).uri)
+            assertEquals(listOf(1), removed)
+            assertSavedUris(first, third)
+            assertTrue("Removed source file must stay on disk", secondFile.exists())
+            assertTrue("Other source files must stay on disk", firstFile.exists() && thirdFile.exists())
+        }
+    }
+
+    @Test
+    fun removeActiveItemClearsActiveAndPlayingState() {
+        runBlocking {
+            val first = Uri.fromFile(createWavFile("remove_active_first.wav"))
+            val second = Uri.fromFile(createWavFile("remove_active_second.wav"))
+            manager.save(storage)
+            manager.addFiles(arrayOf(first, second))
+            manager.setActive(first)
+            manager.setPlayingState(true)
+
+            assertEquals(PlaylistManager.Item.State.PLAYING, manager.itemAt(0).state)
+
+            manager.removeAt(0)
+
+            assertEquals(1, manager.size)
+            assertEquals(second, manager.itemAt(0).uri)
+            assertEquals(PlaylistManager.Item.State.NONE, manager.itemAt(0).state)
+
+            manager.setPlayingState(true)
+            assertEquals(PlaylistManager.Item.State.NONE, manager.itemAt(0).state)
+        }
+    }
+
+    @Test
+    fun removeLastItemPersistsEmptyPlaylist() {
+        runBlocking {
+            val uri = Uri.fromFile(createWavFile("remove_only.wav"))
+            manager.save(storage)
+            manager.addFiles(arrayOf(uri))
+
+            manager.removeAt(0)
+
+            assertEquals(0, manager.size)
+            assertEquals("[]", storage.getString("KEY_PLAYLIST", null))
+            assertSavedUris()
+        }
+    }
+
+    @Test
+    fun removeAtIgnoresInvalidIndex() {
+        runBlocking {
+            val uri = Uri.fromFile(createWavFile("remove_invalid.wav"))
+            manager.save(storage)
+            manager.addFiles(arrayOf(uri))
+
+            val removed = mutableListOf<Int>()
+            manager.addListener(object : PlaylistManager.Listener {
+                override fun onItemRemoved(index: Int) {
+                    removed.add(index)
+                }
+            })
+
+            manager.removeAt(-1)
+            manager.removeAt(1)
+            manager.removeAt(99)
+
+            assertEquals(1, manager.size)
+            assertEquals(uri, manager.itemAt(0).uri)
+            assertTrue(removed.isEmpty())
+            assertSavedUris(uri)
+        }
+    }
+
     private fun assertSavedUris(vararg expected: Uri) {
         val decoded = PlaylistStorage.decode(storage.getString("KEY_PLAYLIST", null))
         assertTrue(decoded is PlaylistStorage.Decoded.Parsed)

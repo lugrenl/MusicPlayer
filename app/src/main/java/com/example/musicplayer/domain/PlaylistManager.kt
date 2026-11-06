@@ -25,6 +25,7 @@ interface PlaylistManager {
     interface Listener {
         fun onItemAdded(index: Int) = Unit
         fun onItemChanged(index: Int) = Unit
+        fun onItemRemoved(index: Int) = Unit
     }
 
     fun addListener(listener: Listener)
@@ -36,6 +37,8 @@ interface PlaylistManager {
     suspend fun addFiles(files: Array<Uri>)
 
     fun itemAt(index: Int): Item
+
+    fun removeAt(index: Int)
 
     fun setActive(uri: Uri?)
 

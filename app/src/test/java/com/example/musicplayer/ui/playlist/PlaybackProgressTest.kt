@@ -2,6 +2,7 @@ package com.example.musicplayer.ui.playlist
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertSame
 import org.junit.Test
 
 class PlaybackProgressTest {
@@ -46,6 +47,17 @@ class PlaybackProgressTest {
     @Test
     fun formatsLongDurations() {
         assertEquals("125:07", formatPlaybackTime(7_507_000L))
+    }
+
+    @Test
+    fun progressIsRemappedAfterItemRemoval() {
+        val progress = PlaybackProgress(2, 15_000L, 30_000L, true)
+
+        assertNull(progress.remapAfterItemRemoved(2))
+        assertEquals(1, progress.remapAfterItemRemoved(0)?.itemIndex)
+        assertEquals(15_000L, progress.remapAfterItemRemoved(0)?.positionMs)
+        assertSame(progress, progress.remapAfterItemRemoved(3))
+        assertNull((null as PlaybackProgress?).remapAfterItemRemoved(0))
     }
 
     @Test

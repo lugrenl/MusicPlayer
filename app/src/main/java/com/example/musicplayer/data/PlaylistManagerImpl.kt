@@ -110,6 +110,19 @@ class PlaylistManagerImpl(private val context: Context): PlaylistManager {
 
     override fun itemAt(index: Int): PlaylistManager.Item = items[index]
 
+    override fun removeAt(index: Int) {
+        if (released || index !in items.indices) return
+
+        val removed = items.removeAt(index)
+        if (removed === activeItem) {
+            activeItem = null
+            isPlaying = false
+        }
+
+        notify { onItemRemoved(index) }
+        save(storage ?: PreferenceManager.getDefaultSharedPreferences(context))
+    }
+
     override fun setActive(uri: Uri?) {
         val item = items.find { it.uri == uri }
         if (item == activeItem) return

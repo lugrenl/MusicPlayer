@@ -29,9 +29,10 @@ class PlaylistProgressUiTest {
         try {
             lateinit var recyclerView: RecyclerView
             lateinit var adapter: PlaylistAdapter
+            lateinit var model: FakePlaylistManager
 
             scenario.onActivity { activity ->
-                val model = FakePlaylistManager(
+                model = FakePlaylistManager(
                     listOf(FakeItem(0), FakeItem(1), FakeItem(2))
                 )
                 adapter = PlaylistAdapter(
@@ -39,6 +40,7 @@ class PlaylistProgressUiTest {
                     object : PlaylistAdapter.Actions {
                         override fun onPreviewClicked(index: Int) = Unit
                         override fun onTrackClicked(index: Int) = Unit
+                        override fun onRemoveClicked(index: Int) = Unit
                     }
                 )
                 recyclerView = RecyclerView(activity).apply {
@@ -88,6 +90,19 @@ class PlaylistProgressUiTest {
             }
 
             scenario.onActivity {
+                model.removeAt(0)
+            }
+            InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+
+            scenario.onActivity {
+                assertProgressVisibility(recyclerView, visiblePosition = 1)
+                assertEquals(
+                    "00:15 / 00:30",
+                    row(recyclerView, 1).findViewById<TextView>(R.id.progress_time).text.toString()
+                )
+            }
+
+            scenario.onActivity {
                 adapter.updateProgress(null)
             }
             InstrumentationRegistry.getInstrumentation().waitForIdleSync()
@@ -120,9 +135,10 @@ class PlaylistProgressUiTest {
     }
 
     private class FakePlaylistManager(
-        private val items: List<PlaylistManager.Item>
+        items: List<PlaylistManager.Item>
     ) : PlaylistManager {
 
+        private val items = items.toMutableList()
         private val listeners = mutableSetOf<PlaylistManager.Listener>()
 
         override val size: Int get() = items.size
@@ -138,6 +154,12 @@ class PlaylistProgressUiTest {
         override suspend fun addFiles(files: Array<Uri>) = Unit
 
         override fun itemAt(index: Int): PlaylistManager.Item = items[index]
+
+        override fun removeAt(index: Int) {
+            if (index !in items.indices) return
+            items.removeAt(index)
+            listeners.forEach { it.onItemRemoved(index) }
+        }
 
         override fun setActive(uri: Uri?) = Unit
 

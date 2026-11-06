@@ -7,6 +7,7 @@ import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
 import android.view.View
+import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.SeekBar
 import android.widget.TextView
@@ -402,6 +403,69 @@ class PlaylistInteractionTest {
         }
     }
 
+    @Test
+    fun deleteButtonRemovesRowWithoutOpeningNowPlayingOrChangingPlayback() {
+        val (launched, viewModel) = launchWithTracks(10_000, 10_000, 10_000)
+        try {
+            launched.onActivity { activity ->
+                playPause(activity, 1)
+            }
+            awaitCondition { viewModel.playbackProgress()?.isPlaying == true }
+            awaitCondition { (viewModel.playbackProgress()?.positionMs ?: 0L) >= 500L }
+
+            lateinit var currentUri: Uri
+            launched.onActivity { activity ->
+                currentUri = viewModel.model.itemAt(1).uri
+                row(activity, 0)
+                    .findViewById<ImageButton>(R.id.delete)
+                    .performClick()
+            }
+            InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+
+            launched.onActivity { activity ->
+                assertEquals(2, viewModel.model.size)
+                assertEquals(currentUri, viewModel.model.itemAt(0).uri)
+                assertEquals(0, viewModel.playbackProgressForScreen()?.itemIndex)
+                assertEquals(true, viewModel.playbackProgress()?.isPlaying)
+                assertFalse(hasNowPlaying(activity))
+            }
+        } finally {
+            launched.close()
+        }
+    }
+
+    @Test
+    fun deleteLastTrackShowsEmptyState() {
+        val (launched, viewModel) = launchWithTracks(2_000)
+        try {
+            launched.onActivity { activity ->
+                row(activity, 0)
+                    .findViewById<ImageButton>(R.id.delete)
+                    .performClick()
+            }
+            InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+
+            launched.onActivity { activity ->
+                assertEquals(0, viewModel.model.size)
+                assertEquals(
+                    View.VISIBLE,
+                    activity.findViewById<View>(R.id.image_empty_playlist).visibility
+                )
+                assertEquals(
+                    View.VISIBLE,
+                    activity.findViewById<View>(R.id.text_empty_playlist).visibility
+                )
+                assertEquals(
+                    View.GONE,
+                    activity.findViewById<View>(R.id.playlist_view).visibility
+                )
+                assertFalse(hasNowPlaying(activity))
+            }
+        } finally {
+            launched.close()
+        }
+    }
+
     private fun launchWithTracks(
         vararg durationsMs: Int
     ): Pair<ActivityScenario<MainActivity>, PlaylistViewModel> {
@@ -465,10 +529,9 @@ class PlaylistInteractionTest {
         awaitCondition(timeoutMs = 6_000) {
             val progress = viewModel.playbackProgressForScreen()
                 ?: return@awaitCondition false
-            val duration = progress.safeDurationMs ?: return@awaitCondition false
             progress.itemIndex == index &&
                 !progress.isPlaying &&
-                progress.safePositionMs >= duration - 300L
+                viewModel.isPlaybackEnded()
         }
     }
 

@@ -48,6 +48,11 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist) {
         override fun onItemAdded(index: Int) {
             updateEmptyState()
         }
+
+        override fun onItemRemoved(index: Int) {
+            updateEmptyState()
+            updateProgress()
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -65,6 +70,10 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist) {
                     viewModel.selectTrack(index)
                     updateProgress()
                     openNowPlaying()
+                }
+
+                override fun onRemoveClicked(index: Int) {
+                    viewModel.removeAt(index)
                 }
             }
         )

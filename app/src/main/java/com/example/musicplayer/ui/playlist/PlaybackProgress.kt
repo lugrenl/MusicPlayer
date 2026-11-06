@@ -33,6 +33,15 @@ data class PlaybackProgress(
     }
 }
 
+internal fun PlaybackProgress?.remapAfterItemRemoved(index: Int): PlaybackProgress? {
+    val progress = this ?: return null
+    return when {
+        progress.itemIndex == index -> null
+        progress.itemIndex > index -> progress.copy(itemIndex = progress.itemIndex - 1)
+        else -> progress
+    }
+}
+
 internal fun seekTargetMs(progress: Int, durationMs: Long?): Long? {
     val duration = durationMs?.takeIf { it > 0L } ?: return null
     val clampedProgress = progress.coerceIn(0, PlaybackProgress.MAX_PROGRESS)

@@ -7,6 +7,7 @@ import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
@@ -27,11 +28,17 @@ class PlaylistAdapter(
     interface Actions {
         fun onPreviewClicked(index: Int)
         fun onTrackClicked(index: Int)
+        fun onRemoveClicked(index: Int)
     }
 
     private val listener = object : PlaylistManager.Listener {
         override fun onItemAdded(index: Int) = notifyItemInserted(index)
         override fun onItemChanged(index: Int) = notifyItemChanged(index, Unit)
+
+        override fun onItemRemoved(index: Int) {
+            playbackProgress = playbackProgress.remapAfterItemRemoved(index)
+            notifyItemRemoved(index)
+        }
     }
 
     fun updateProgress(progress: PlaybackProgress?) {
@@ -120,6 +127,12 @@ class TrackViewHolder(
     private val progressTime = view.findViewById<TextView>(R.id.progress_time)
 
     init {
+        view.findViewById<ImageButton>(R.id.delete).setOnClickListener {
+            val index = adapterPosition
+            if (index != RecyclerView.NO_POSITION) {
+                actions.onRemoveClicked(index)
+            }
+        }
         itemView.setOnClickListener {
             val index = adapterPosition
             if (index != RecyclerView.NO_POSITION) {

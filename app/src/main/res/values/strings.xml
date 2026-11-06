@@ -16,4 +16,5 @@
     <string name="play">Play</string>
     <string name="pause">Pause</string>
     <string name="album_cover">Album cover</string>
+    <string name="delete_track">Delete track</string>
 </resources>

@@ -37,6 +37,12 @@ class PlaylistViewModel(application: Application) : AndroidViewModel(application
             player.addMediaItem(MediaItem.fromUri(model.itemAt(index).uri))
             player.prepare()
         }
+
+        override fun onItemRemoved(index: Int) {
+            if (index in 0 until player.mediaItemCount) {
+                player.removeMediaItem(index)
+            }
+        }
     }
 
     init {
@@ -49,6 +55,22 @@ class PlaylistViewModel(application: Application) : AndroidViewModel(application
     fun addFiles(files: Array<Uri>) {
         viewModelScope.launch {
             model.addFiles(files)
+        }
+    }
+
+    fun removeAt(index: Int) {
+        if (index !in 0 until model.size) return
+
+        val wasCurrent = player.currentMediaItemIndex == index
+        if (wasCurrent) {
+            player.pause()
+        }
+
+        model.removeAt(index)
+
+        if (wasCurrent) {
+            hasUserStartedPlayback = false
+            model.setActive(player.currentMediaItem?.playbackProperties?.uri)
         }
     }
 
